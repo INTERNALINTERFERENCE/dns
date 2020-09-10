@@ -8,4 +8,4 @@ This is a blazor app. You can use it instead of cmd
 2. Open Packet Manager Console
 3. Paste this command -> Update-Database
 4. Press F6 (Build Solution)
-5. Press Ctrl + F5
+5. Press Ctrl + F5 or F5
