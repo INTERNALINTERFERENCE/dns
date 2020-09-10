@@ -1,0 +1,121 @@
+﻿@inject WebShell_blazor.Data.Repository.IRepository repository;
+@page "/"
+@using System.Diagnostics;
+
+
+
+
+
+<div class="container-fluid">
+    <div class="input-group mb-3">
+        <input type="text" class="form-control" placeholder="Bash command" aria-label="Bash command"
+               aria-describedby="basic-addon2" @bind-value="_bashCommand" @onkeydown="KeyHandler">
+        <div class="input-group-append">
+            <button class="btn btn-outline-secondary" @onclick="ProcessBashCommand" type="button">Send</button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col">
+            <div class="form-group">
+                <label for="formcontrol"></label>
+                <textarea class="form-control" id="formcontrol" rows="30" @bind="_result"></textarea>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code{
+    private string _result;
+    private string _error;
+    private string _bashCommand;
+    private bool _isEdit = true;
+    private int _index = 0;
+
+    private List<string> _allCommands = new List<string>();
+
+    protected override void OnInitialized()
+    {
+        repository.GetAllCommands(_allCommands);
+    }
+
+    private void ProcessBashCommand()
+    {
+        _allCommands.Add(_bashCommand);
+        repository.AddBashCommand(_bashCommand);
+
+        var cmd = Process.Start(new ProcessStartInfo
+        {
+            FileName = "cmd",
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            RedirectStandardError = true,
+            RedirectStandardInput = true,
+            RedirectStandardOutput = true,
+        });
+        if (cmd is null) return;
+
+        cmd.StandardInput.WriteLine(_bashCommand);
+        cmd.StandardInput.WriteLine("exit");
+        _result += cmd.StandardOutput.ReadToEnd();
+        _bashCommand = string.Empty;
+
+        _error = cmd.StandardError.ReadToEnd();
+        if (!string.IsNullOrWhiteSpace(_error))
+        {
+            _result += _error;
+            _bashCommand = string.Empty;
+            return;
+        }
+    }
+
+    private void KeyHandler(KeyboardEventArgs e)
+    {
+        if (e.Key == "ArrowUp")
+        {
+            if (!_isEdit)
+            {
+                _isEdit = true;
+                _index = 0;
+            }
+            else
+            {
+                _index++;
+                if (_index > _allCommands.Count() - 1) _index = _allCommands.Count() - 1;
+            }
+
+            _bashCommand = _allCommands[_index];
+        }
+        else if (e.Key == "ArrowDown")
+        {
+            if (!_isEdit)
+            {
+                _isEdit = true;
+                _index = _allCommands.Count() - 1;
+            }
+            else
+            {
+                _index--;
+                if (_index < 0) _index = 0;
+            }
+            _bashCommand = _allCommands[_index];
+        }
+        else if(e.Key == "Enter")
+        {
+            ProcessBashCommand();
+        }
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
