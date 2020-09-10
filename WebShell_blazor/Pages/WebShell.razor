@@ -57,13 +57,13 @@
 
         cmd.StandardInput.WriteLine(_bashCommand);
         cmd.StandardInput.WriteLine("exit");
-        _result += cmd.StandardOutput.ReadToEnd();
+        _result = cmd.StandardOutput.ReadToEnd();
         _bashCommand = string.Empty;
 
         _error = cmd.StandardError.ReadToEnd();
         if (!string.IsNullOrWhiteSpace(_error))
         {
-            _result += _error;
+            _result = _error;
             _bashCommand = string.Empty;
             return;
         }
