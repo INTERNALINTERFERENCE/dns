@@ -9,7 +9,7 @@
 <div class="container-fluid">
     <div class="input-group mb-3">
         <input type="text" class="form-control" placeholder="Bash command" aria-label="Bash command"
-               aria-describedby="basic-addon2" @bind-value="_bashCommand" @onkeydown="KeyHandler">
+               aria-describedby="basic-addon2" @bind="_bashCommand" @bind:event="oninput" @onkeydown="KeyHandler">
         <div class="input-group-append">
             <button class="btn btn-outline-secondary" @onclick="ProcessBashCommand" type="button">Send</button>
         </div>
@@ -99,7 +99,12 @@
                 if (_index < 0) _index = 0;
             }
             _bashCommand = _allCommands[_index];
-        }      
+        }
+        else if(e.Key == "Enter")
+        {
+            ProcessBashCommand();
+            _isEdit = false;
+        }
     }
 }
 
